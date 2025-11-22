@@ -1,0 +1,59 @@
+<div class="home-container">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <h2>📱 Agenda de Contactos</h2>
+    </div>
+    <div class="navbar-menu">
+      <a routerLink="/home" routerLinkActive="active">Inicio</a>
+      <a routerLink="/contacts" routerLinkActive="active">Contactos</a>
+      <a routerLink="/statistics" routerLinkActive="active">Estadísticas</a>
+      <a routerLink="/profile" routerLinkActive="active">Perfil</a>
+      <button class="btn-logout" (click)="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div class="welcome-section">
+      <h1>¡Bienvenido, {{ userName }}! 👋</h1>
+      <p>Gestiona tus contactos de manera fácil y rápida</p>
+    </div>
+
+    <div class="cards-container" *ngIf="!loading">
+      <div class="card card-primary">
+        <div class="card-icon">👥</div>
+        <div class="card-content">
+          <h3>Total de Contactos</h3>
+          <p class="card-number">{{ totalContacts }}</p>
+        </div>
+      </div>
+
+      <div class="card card-secondary" routerLink="/contacts">
+        <div class="card-icon">➕</div>
+        <div class="card-content">
+          <h3>Agregar Contacto</h3>
+          <p>Crea un nuevo contacto</p>
+        </div>
+      </div>
+
+      <div class="card card-tertiary" routerLink="/statistics">
+        <div class="card-icon">📊</div>
+        <div class="card-content">
+          <h3>Ver Estadísticas</h3>
+          <p>Análisis de contactos</p>
+        </div>
+      </div>
+
+      <div class="card card-quaternary" routerLink="/profile">
+        <div class="card-icon">👤</div>
+        <div class="card-content">
+          <h3>Mi Perfil</h3>
+          <p>Información personal</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <p>Cargando...</p>
+    </div>
+  </div>
+</div>

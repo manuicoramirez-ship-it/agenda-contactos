@@ -1,0 +1,78 @@
+<div class="profile-container">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <h2>📱 Agenda de Contactos</h2>
+    </div>
+    <div class="navbar-menu">
+      <a routerLink="/home" routerLinkActive="active">Inicio</a>
+      <a routerLink="/contacts" routerLinkActive="active">Contactos</a>
+      <a routerLink="/statistics" routerLinkActive="active">Estadísticas</a>
+      <a routerLink="/profile" routerLinkActive="active">Perfil</a>
+      <button class="btn-logout" (click)="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div class="header">
+      <h1>👤 Mi Perfil</h1>
+      <p>Información de tu cuenta</p>
+    </div>
+
+    <div class="profile-card" *ngIf="!loading && userData">
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          {{ userData.firstName?.charAt(0) }}{{ userData.lastName?.charAt(0) }}
+        </div>
+      </div>
+
+      <div class="profile-info">
+        <h2>{{ userData.firstName }} {{ userData.lastName }}</h2>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">📧 Correo Electrónico</div>
+            <div class="info-value">{{ userData.email }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">👤 Nombre</div>
+            <div class="info-value">{{ userData.firstName }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">👥 Apellido</div>
+            <div class="info-value">{{ userData.lastName }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">🆔 ID de Usuario</div>
+            <div class="info-value user-id">{{ userData.uid }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">📅 Fecha de Registro</div>
+            <div class="info-value">{{ userData.createdAt?.toDate() | date:'dd/MM/yyyy' }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">⏰ Hora de Registro</div>
+            <div class="info-value">{{ userData.createdAt?.toDate() | date:'HH:mm:ss' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button class="btn-action btn-primary" routerLink="/contacts">
+          📇 Ver Contactos
+        </button>
+        <button class="btn-action btn-secondary" routerLink="/statistics">
+          📊 Ver Estadísticas
+        </button>
+      </div>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <p>Cargando perfil...</p>
+    </div>
+  </div>
+</div>

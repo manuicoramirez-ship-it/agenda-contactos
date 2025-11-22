@@ -1,0 +1,83 @@
+<div class="statistics-container">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <h2>📱 Agenda de Contactos</h2>
+    </div>
+    <div class="navbar-menu">
+      <a routerLink="/home" routerLinkActive="active">Inicio</a>
+      <a routerLink="/contacts" routerLinkActive="active">Contactos</a>
+      <a routerLink="/statistics" routerLinkActive="active">Estadísticas</a>
+      <a routerLink="/profile" routerLinkActive="active">Perfil</a>
+      <button class="btn-logout" (click)="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div class="header">
+      <h1>📊 Estadísticas de Contactos</h1>
+      <p>Análisis y resumen de tu agenda</p>
+    </div>
+
+    <div class="stats-container" *ngIf="!loading">
+      <!-- Tarjetas de Estadísticas -->
+      <div class="stats-cards">
+        <div class="stat-card card-total">
+          <div class="stat-icon">👥</div>
+          <div class="stat-content">
+            <h3>Total de Contactos</h3>
+            <p class="stat-number">{{ totalContacts }}</p>
+          </div>
+        </div>
+
+        <div class="stat-card card-familia" *ngIf="contactsByType['Familia']">
+          <div class="stat-icon">👨‍👩‍👧‍👦</div>
+          <div class="stat-content">
+            <h3>Familia</h3>
+            <p class="stat-number">{{ contactsByType['Familia'] }}</p>
+          </div>
+        </div>
+
+        <div class="stat-card card-amigo" *ngIf="contactsByType['Amigo']">
+          <div class="stat-icon">🤝</div>
+          <div class="stat-content">
+            <h3>Amigos</h3>
+            <p class="stat-number">{{ contactsByType['Amigo'] }}</p>
+          </div>
+        </div>
+
+        <div class="stat-card card-trabajo" *ngIf="contactsByType['Trabajo']">
+          <div class="stat-icon">💼</div>
+          <div class="stat-content">
+            <h3>Trabajo</h3>
+            <p class="stat-number">{{ contactsByType['Trabajo'] }}</p>
+          </div>
+        </div>
+
+        <div class="stat-card card-otro" *ngIf="contactsByType['Otro']">
+          <div class="stat-icon">📋</div>
+          <div class="stat-content">
+            <h3>Otros</h3>
+            <p class="stat-number">{{ contactsByType['Otro'] }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfica de Barras -->
+      <div class="chart-container" *ngIf="totalContacts > 0">
+        <h2>Distribución de Contactos por Tipo</h2>
+        <div class="chart-wrapper">
+          <canvas #chartCanvas></canvas>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="totalContacts === 0">
+        <p>📭 No hay contactos para mostrar estadísticas</p>
+        <p>Agrega contactos para ver el análisis</p>
+      </div>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <p>Cargando estadísticas...</p>
+    </div>
+  </div>
+</div>

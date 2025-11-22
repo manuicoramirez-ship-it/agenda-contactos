@@ -1,0 +1,127 @@
+<div class="contacts-container">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <h2>📱 Agenda de Contactos</h2>
+    </div>
+    <div class="navbar-menu">
+      <a routerLink="/home" routerLinkActive="active">Inicio</a>
+      <a routerLink="/contacts" routerLinkActive="active">Contactos</a>
+      <a routerLink="/statistics" routerLinkActive="active">Estadísticas</a>
+      <a routerLink="/profile" routerLinkActive="active">Perfil</a>
+      <button class="btn-logout" (click)="logout()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div class="header">
+      <h1>Mis Contactos</h1>
+      <button class="btn-add" (click)="toggleForm()">
+        {{ showForm ? '❌ Cancelar' : '➕ Agregar Contacto' }}
+      </button>
+    </div>
+
+    <!-- Formulario -->
+    <div class="form-container" *ngIf="showForm">
+      <h3>{{ editingId ? 'Editar Contacto' : 'Nuevo Contacto' }}</h3>
+      <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre *</label>
+            <input type="text" formControlName="firstName" placeholder="Nombre">
+            <div class="error-msg" *ngIf="contactForm.get('firstName')?.invalid && contactForm.get('firstName')?.touched">
+              Campo obligatorio (mínimo 2 caracteres)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Apellido *</label>
+            <input type="text" formControlName="lastName" placeholder="Apellido">
+            <div class="error-msg" *ngIf="contactForm.get('lastName')?.invalid && contactForm.get('lastName')?.touched">
+              Campo obligatorio (mínimo 2 caracteres)
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Correo Electrónico *</label>
+            <input type="email" formControlName="email" placeholder="ejemplo@gmail.com">
+            <div class="error-msg" *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
+              Ingresa un correo válido
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono (9 dígitos) *</label>
+            <input type="text" formControlName="phone" placeholder="987654321" maxlength="9">
+            <div class="error-msg" *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched">
+              Debe tener exactamente 9 dígitos
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Contacto *</label>
+          <select formControlName="contactType">
+            <option value="">Selecciona un tipo</option>
+            <option *ngFor="let type of contactTypes" [value]="type">{{ type }}</option>
+          </select>
+          <div class="error-msg" *ngIf="contactForm.get('contactType')?.invalid && contactForm.get('contactType')?.touched">
+            Selecciona un tipo de contacto
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="contactForm.invalid">
+          {{ editingId ? '💾 Actualizar' : '➕ Guardar' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="search-container" *ngIf="!loading">
+      <input 
+        type="text" 
+        placeholder="🔍 Buscar por nombre, correo, teléfono o tipo..."
+        (input)="filterContacts($event)"
+        class="search-input">
+      <p class="results-count">Mostrando {{ filteredContacts.length }} de {{ contacts.length }} contactos</p>
+    </div>
+
+    <!-- Lista de Contactos -->
+    <div class="contacts-grid" *ngIf="!loading && filteredContacts.length > 0">
+      <div class="contact-card" *ngFor="let contact of filteredContacts">
+        <div class="contact-header">
+          <div class="contact-avatar">
+            {{ contact.firstName.charAt(0) }}{{ contact.lastName.charAt(0) }}
+          </div>
+          <div class="contact-info">
+            <h3>{{ contact.firstName }} {{ contact.lastName }}</h3>
+            <span class="contact-type" [ngClass]="'type-' + contact.contactType.toLowerCase()">
+              {{ contact.contactType }}
+            </span>
+          </div>
+        </div>
+        <div class="contact-details">
+          <p>📧 {{ contact.email }}</p>
+          <p>📱 {{ contact.phone | phoneFormat }}</p>
+        </div>
+        <div class="contact-actions">
+          <button class="btn-edit" (click)="editContact(contact)">✏️ Editar</button>
+          <button class="btn-delete" (click)="deleteContact(contact.id)">🗑️ Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && filteredContacts.length === 0 && contacts.length > 0">
+      <p>❌ No se encontraron contactos con ese criterio</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && contacts.length === 0">
+      <p>📭 No tienes contactos aún. ¡Agrega tu primer contacto!</p>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <p>Cargando contactos...</p>
+    </div>
+  </div>
+</div>
