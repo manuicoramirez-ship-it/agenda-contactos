@@ -141,3 +141,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 50px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #666;
+  transition: 0.3s;
+}
+
+.toggle-password:hover {
+  color: #f5576c;
+  transform: scale(1.1);
+}

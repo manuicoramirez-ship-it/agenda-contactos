@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -17,6 +17,10 @@ export class Register {
   successMessage: string = '';
   loading: boolean = false;
 
+  // 👁️ mostrar/ocultar
+  showPassword: boolean = false;
+  showConfirmPassword: boolean = false;
+
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -26,14 +30,35 @@ export class Register {
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required, Validators.minLength(6)]]
+    },
+    {
+      validators: this.passwordsMatch
     });
+  }
+
+  // VALIDACIÓN PERSONALIZADA: ambas contraseñas deben ser iguales
+  passwordsMatch(form: AbstractControl) {
+    const pass = form.get('password')?.value;
+    const confirm = form.get('confirmPassword')?.value;
+
+    return pass === confirm ? null : { mismatch: true };
   }
 
   get firstName() { return this.registerForm.get('firstName'); }
   get lastName() { return this.registerForm.get('lastName'); }
   get email() { return this.registerForm.get('email'); }
   get password() { return this.registerForm.get('password'); }
+  get confirmPassword() { return this.registerForm.get('confirmPassword'); }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
 
   async onSubmit() {
     if (this.registerForm.valid) {
