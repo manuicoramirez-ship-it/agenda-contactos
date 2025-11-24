@@ -119,3 +119,34 @@
 .register-link a:hover {
   text-decoration: underline;
 }
+
+.password-group {
+  position: relative;
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 50px; /* espacio para el botón */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+  transition: 0.3s;
+}
+
+.toggle-password:hover {
+  color: #667eea;
+  transform: scale(1.1);
+}

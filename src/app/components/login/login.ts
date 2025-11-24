@@ -15,6 +15,7 @@ export class Login {
   loginForm: FormGroup;
   errorMessage: string = '';
   loading: boolean = false;
+  showPassword: boolean = false;
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -29,6 +30,11 @@ export class Login {
 
   get email() { return this.loginForm.get('email'); }
   get password() { return this.loginForm.get('password'); }
+
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
 
   async onSubmit() {
     if (this.loginForm.valid) {
