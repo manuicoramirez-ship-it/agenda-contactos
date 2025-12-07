@@ -18,45 +18,51 @@
       <p>Información de tu cuenta</p>
     </div>
 
-    <div class="profile-card" *ngIf="!loading && userData">
+    <div class="profile-card" *ngIf="!loading">
       <div class="profile-avatar">
         <div class="avatar-circle">
-          {{ userData.firstName?.charAt(0) }}{{ userData.lastName?.charAt(0) }}
+          {{ userInitials }}
         </div>
       </div>
 
       <div class="profile-info">
-        <h2>{{ userData.firstName }} {{ userData.lastName }}</h2>
+        <h2>{{ userName }}</h2>
         
         <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">📧 Correo Electrónico</div>
-            <div class="info-value">{{ userData.email }}</div>
-          </div>
 
           <div class="info-item">
             <div class="info-label">👤 Nombre</div>
-            <div class="info-value">{{ userData.firstName }}</div>
+            <div class="info-value">{{ firstName }}</div>
           </div>
 
           <div class="info-item">
             <div class="info-label">👥 Apellido</div>
-            <div class="info-value">{{ userData.lastName }}</div>
+            <div class="info-value">{{ lastName }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">📧 Correo Electrónico</div>
+            <div class="info-value">{{ userEmail }}</div>
           </div>
 
           <div class="info-item">
             <div class="info-label">🆔 ID de Usuario</div>
-            <div class="info-value user-id">{{ userData.uid }}</div>
+            <div class="info-value user-id">{{ userId }}</div>
           </div>
 
           <div class="info-item">
             <div class="info-label">📅 Fecha de Registro</div>
-            <div class="info-value">{{ userData.createdAt?.toDate() | date:'dd/MM/yyyy' }}</div>
+            <div class="info-value">{{ createdAtDate }}</div>
           </div>
 
           <div class="info-item">
             <div class="info-label">⏰ Hora de Registro</div>
-            <div class="info-value">{{ userData.createdAt?.toDate() | date:'HH:mm:ss' }}</div>
+            <div class="info-value">{{ createdAtTime }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">📱Total de Contactos</div>
+            <div class="info-value">{{ totalContacts }}</div>
           </div>
         </div>
       </div>
