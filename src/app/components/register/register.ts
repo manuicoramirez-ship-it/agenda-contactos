@@ -17,7 +17,6 @@ export class Register {
   successMessage: string = '';
   loading: boolean = false;
 
-  // 👁️ mostrar/ocultar
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
 
@@ -38,11 +37,10 @@ export class Register {
     });
   }
 
-  // VALIDACIÓN PERSONALIZADA: ambas contraseñas deben ser iguales
   passwordsMatch(form: AbstractControl) {
     const pass = form.get('password')?.value;
     const confirm = form.get('confirmPassword')?.value;
-
+    
     return pass === confirm ? null : { mismatch: true };
   }
 
@@ -72,10 +70,14 @@ export class Register {
           this.registerForm.value.firstName,
           this.registerForm.value.lastName
         );
-        this.successMessage = 'Usuario creado exitosamente. Redirigiendo...';
+        
+        // ARREGLADO: Mostrar mensaje y esperar 3 segundos
+        this.successMessage = '✅ Usuario creado exitosamente. Redirigiendo en 3 segundos...';
+        
+        // ARREGLADO: Cambiar de 2ms a 3000ms (3 segundos)
         setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 2000);
+          this.router.navigate(['/login']);
+        }, 3000);
       } catch (error: any) {
         if (error.code === 'auth/email-already-in-use') {
           this.errorMessage = 'Este correo ya está registrado';

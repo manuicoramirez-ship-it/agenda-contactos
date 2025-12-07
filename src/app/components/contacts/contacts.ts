@@ -21,7 +21,7 @@ export class Contacts implements OnInit {
   showForm: boolean = false;
   editingId: string | null = null;
   searchTerm: string = '';
-  loading: boolean = true;
+  loading: boolean = false;
 
   contactTypes = ['Familia', 'Amigo', 'Trabajo', 'Otro'];
 

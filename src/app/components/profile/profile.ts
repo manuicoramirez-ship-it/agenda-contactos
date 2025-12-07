@@ -11,25 +11,47 @@ import { AuthService } from '../../services/auth';
   styleUrls: ['./profile.css']
 })
 export class Profile implements OnInit {
-userData: any = null;
-loading: boolean = true;private authService = inject(AuthService);async ngOnInit() {
-await this.loadUserProfile();
-}async loadUserProfile() {
-try {
-const user = this.authService.currentUser;
-if (user) {
-this.userData = await this.authService.getUserData(user.uid);
-this.userData.email = user.email;
-this.userData.uid = user.uid;
-}
-} catch (error) {
-console.error(error);
-} finally {
-this.loading = false;
-}
-}logout() {
-if (confirm('¿Estás seguro de cerrar sesión?')) {
-this.authService.logout();
-}
-}
+  userData: any = null;
+  loading: boolean = false;
+
+  private authService = inject(AuthService);
+
+  ngOnInit() {
+    this.loadUserProfile();
+  }
+
+  loadUserProfile() {
+    const user = this.authService.currentUser;
+    if (user && user.email) {
+      // Extraer nombre del email
+      const emailUsername = user.email.split('@')[0];
+      const nameParts = emailUsername.split('.');
+      
+      this.userData = {
+        email: user.email,
+        uid: user.uid,
+        firstName: this.capitalize(nameParts[0] || 'Usuario'),
+        lastName: this.capitalize(nameParts[1] || ''),
+        createdAt: { 
+          toDate: () => {
+            if (user.metadata && user.metadata.creationTime) {
+              return new Date(user.metadata.creationTime);
+            }
+            return new Date();
+          }
+        }
+      };
+    }
+  }
+
+  capitalize(str: string): string {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  logout() {
+    if (confirm('¿Estás seguro de cerrar sesión?')) {
+      this.authService.logout();
+    }
+  }
 }
