@@ -17,14 +17,14 @@ Chart.register(...registerables);
 })
 export class Statistics implements OnInit, AfterViewInit {
   @ViewChild('chartCanvas', { static: false }) chartCanvas!: ElementRef<HTMLCanvasElement>;
-  
+    
   contacts: Contact[] = [];
-  loading: boolean = false;
-  
+  loading: boolean = true;
+    
   totalContacts: number = 0;
   contactsByType: { [key: string]: number } = {};
-  // Tipamos correctamente la instancia del chart:
   chart?: Chart<'bar', number[], string>;
+  chartReady: boolean = false;
 
   private authService = inject(AuthService);
   private contactService = inject(ContactService);
@@ -33,27 +33,31 @@ export class Statistics implements OnInit, AfterViewInit {
     await this.loadStatistics();
   }
 
-  // Usamos AfterViewInit para crear el chart cuando el canvas exista
   ngAfterViewInit() {
-    // Si ya cargaron los contactos y se calculó estadísticas, creamos el chart.
-    if (Object.keys(this.contactsByType).length) {
-      // esperamos un tick para asegurarnos el canvas esté listo
-      setTimeout(() => this.createChart(), 50);
+    // Esperar a que se calculen las estadísticas
+    if (Object.keys(this.contactsByType).length > 0 && !this.chartReady) {
+      setTimeout(() => this.createChart(), 100);
     }
   }
 
   async loadStatistics() {
+    this.loading = true;
     try {
       this.contacts = await this.contactService.getContacts();
       this.totalContacts = this.contacts.length;
       this.calculateStatistics();
-
-      // Si el ViewChild ya está inicializado, crea el chart.
-      if (this.chartCanvas && this.chartCanvas.nativeElement) {
-        setTimeout(() => this.createChart(), 100);
+      
+      // ARREGLADO: Crear gráfico después de cargar datos
+      if (this.totalContacts > 0) {
+        setTimeout(() => {
+          if (this.chartCanvas && this.chartCanvas.nativeElement) {
+            this.createChart();
+          }
+        }, 200);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error al cargar estadísticas:', error);
+      alert('Error al cargar estadísticas');
     } finally {
       this.loading = false;
     }
@@ -67,20 +71,31 @@ export class Statistics implements OnInit, AfterViewInit {
   }
 
   createChart() {
-    if (!this.chartCanvas || !this.chartCanvas.nativeElement) return;
+    if (!this.chartCanvas || !this.chartCanvas.nativeElement) {
+      console.error('Canvas no disponible');
+      return;
+    }
+
+    if (this.chartReady) {
+      console.log('El gráfico ya fue creado');
+      return;
+    }
 
     const labels = Object.keys(this.contactsByType);
-    // Convertimos explícitamente los valores a number[] para evitar unknown[]
     const dataValues: number[] = Object.values(this.contactsByType).map(v => Number(v));
+
+    if (labels.length === 0) {
+      console.warn('No hay datos para mostrar');
+      return;
+    }
 
     const colors = [
       'rgba(102, 126, 234, 0.8)',
-      'rgba(118, 75, 162, 0.8)',
-      'rgba(255, 152, 0, 0.8)',
-      'rgba(76, 175, 80, 0.8)'
+      'rgba(56, 142, 60, 0.8)',
+      'rgba(245, 124, 0, 0.8)',
+      'rgba(123, 31, 162, 0.8)'
     ];
 
-    // Tipamos la configuración usando ChartConfiguration genérico
     const config: ChartConfiguration<'bar', number[], string> = {
       type: 'bar',
       data: {
@@ -142,16 +157,23 @@ export class Statistics implements OnInit, AfterViewInit {
       }
     };
 
-    // Obtener el contexto 2D (esto ayuda a que TS infiera correctamente)
-    const ctx = this.chartCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
+    try {
+      const ctx = this.chartCanvas.nativeElement.getContext('2d');
+      if (!ctx) {
+        console.error('No se pudo obtener el contexto 2D');
+        return;
+      }
 
-    // destruimos chart previo si existe (buena práctica)
-    if (this.chart) {
-      this.chart.destroy();
+      if (this.chart) {
+        this.chart.destroy();
+      }
+
+      this.chart = new Chart<'bar', number[], string>(ctx, config);
+      this.chartReady = true;
+      console.log('✅ Gráfico creado exitosamente');
+    } catch (error) {
+      console.error('Error al crear el gráfico:', error);
     }
-
-    // ahora creamos el chart con tipos explícitos
-    this.chart = new Chart<'bar', number[], string>(ctx, config);
   }
 
   logout() {

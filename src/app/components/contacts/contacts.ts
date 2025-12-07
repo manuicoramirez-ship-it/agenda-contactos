@@ -44,11 +44,13 @@ export class Contacts implements OnInit {
   }
 
   async loadContacts() {
+    this.loading = true;
     try {
       this.contacts = await this.contactService.getContacts();
       this.filteredContacts = [...this.contacts];
     } catch (error) {
       console.error(error);
+      alert('Error al cargar contactos');
     } finally {
       this.loading = false;
     }
@@ -72,45 +74,20 @@ export class Contacts implements OnInit {
       contactType: contact.contactType
     });
     this.showForm = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  async onSubmit() {
-    if (this.contactForm.valid) {
-      try {
-        const contactData = {
-          ...this.contactForm.value,
-          userId: this.authService.currentUser?.uid
-        };
-
-        if (this.editingId) {
-          await this.contactService.updateContact(this.editingId, contactData);
-          alert('Contacto actualizado exitosamente');
-        } else {
-          await this.contactService.addContact(contactData);
-          alert('Contacto agregado exitosamente');
-        }
-
-        this.toggleForm();
-        await this.loadContacts();
-      } catch (error) {
-        alert('Error al guardar contacto');
-        console.error(error);
+  isDuplicateContact(email: string, phone: string): boolean {
+    return this.contacts.some(contact => {
+      if (this.editingId && contact.id === this.editingId) {
+        return false; // Ignorar el contacto que estamos editando
       }
-    }
+      return contact.email.toLowerCase() === email.toLowerCase() || 
+             contact.phone === phone;
+    });
   }
 
-  async deleteContact(id: string | undefined) {
-    if (id && confirm('¿Estás seguro de eliminar este contacto?')) {
-      try {
-        await this.contactService.deleteContact(id);
-        alert('Contacto eliminado exitosamente');
-        await this.loadContacts();
-      } catch (error) {
-        alert('Error al eliminar contacto');
-        console.error(error);
-      }
-    }
-  }
+  ///////////////
 
   filterContacts(event: any) {
     this.searchTerm = event.target.value.toLowerCase();
