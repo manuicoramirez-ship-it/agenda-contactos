@@ -87,7 +87,51 @@ export class Contacts implements OnInit {
     });
   }
 
-  ///////////////
+  async onSubmit() {
+    if (this.contactForm.valid) {
+      const formData = this.contactForm.value;
+      
+      // ARREGLADO: Validar duplicados
+      if (!this.editingId && this.isDuplicateContact(formData.email, formData.phone)) {
+        alert('⚠️ Ya existe un contacto con ese correo o teléfono');
+        return;
+      }
+
+      try {
+        const contactData = {
+          ...formData,
+          userId: this.authService.currentUser?.uid
+        };
+
+        if (this.editingId) {
+          await this.contactService.updateContact(this.editingId, contactData);
+          alert('✅ Contacto actualizado exitosamente');
+        } else {
+          await this.contactService.addContact(contactData);
+          alert('✅ Contacto agregado exitosamente');
+        }
+
+        this.toggleForm();
+        await this.loadContacts();
+      } catch (error) {
+        alert('❌ Error al guardar contacto');
+        console.error(error);
+      }
+    }
+  }
+
+  async deleteContact(id: string | undefined) {
+    if (id && confirm('¿Estás seguro de eliminar este contacto?')) {
+      try {
+        await this.contactService.deleteContact(id);
+        alert('✅ Contacto eliminado exitosamente');
+        await this.loadContacts();
+      } catch (error) {
+        alert('❌ Error al eliminar contacto');
+        console.error(error);
+      }
+    }
+  }
 
   filterContacts(event: any) {
     this.searchTerm = event.target.value.toLowerCase();
@@ -99,9 +143,9 @@ export class Contacts implements OnInit {
     contact.contactType.toLowerCase().includes(this.searchTerm)
     );
   }
-    logout() {
+  logout() {
     if (confirm('¿Estás seguro de cerrar sesión?')) {
-    this.authService.logout();
+      this.authService.logout();
     }
-    }
+  }
 }
