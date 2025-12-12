@@ -71,10 +71,9 @@ export class Register {
           this.registerForm.value.lastName
         );
         
-        // ARREGLADO: Mostrar mensaje y esperar 3 segundos
+        // Mostrar mensaje y esperar 3 segundos
         this.successMessage = '✅ Usuario creado exitosamente. Redirigiendo en 3 segundos...';
         
-        // ARREGLADO: Cambiar de 2ms a 3000ms (3 segundos)
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 3000);

@@ -2,6 +2,7 @@ import { Injectable, inject, Injector, runInInjectionContext } from '@angular/co
 import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, user } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, getDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { RoleService, UserRole } from './role';
 
 @Injectable({
   providedIn: 'root'
@@ -11,35 +12,42 @@ export class AuthService {
   private firestore: Firestore = inject(Firestore);
   private router = inject(Router);
   private injector = inject(Injector);
-  
+  private roleService = inject(RoleService);
+    
   user$ = user(this.auth);
   currentUser: any = null;
+  currentUserRole: UserRole = 'user'; // NUEVO
 
   constructor() {
-    this.user$.subscribe(user => {
+    this.user$.subscribe(async user => {
       this.currentUser = user;
-      console.log('Usuario actual:', user?.email || 'No autenticado');
+      if (user) {
+        // NUEVO: Cargar rol al autenticarse
+        this.currentUserRole = await this.roleService.getUserRole(user.uid);
+        console.log('👤 Usuario:', user.email, '| Rol:', this.currentUserRole);
+      }
     });
   }
 
   async register(email: string, password: string, firstName: string, lastName: string) {
     return runInInjectionContext(this.injector, async () => {
       try {
-        console.log('📝 Intentando registrar usuario...');
+        console.log('📝 Registrando usuario...');
         const credential = await createUserWithEmailAndPassword(this.auth, email, password);
-        /*
+        
+        // MODIFICADO: Guardar usuario con rol por defecto
         const userDoc = {
           uid: credential.user.uid,
           email: email,
           firstName: firstName,
           lastName: lastName,
-          createdAt: new Date()
+          role: 'user' as UserRole, // NUEVO: Rol por defecto
+          createdAt: new Date(),
+          lastLogin: new Date()
         };
         
-        console.log('💾 Guardando datos en Firestore...');
         await setDoc(doc(this.firestore, 'users', credential.user.uid), userDoc);
-        */
-        console.log('✅ Usuario registrado exitosamente');
+        console.log('✅ Usuario registrado con rol: user');
         
         return credential;
       } catch (error: any) {
@@ -52,9 +60,20 @@ export class AuthService {
   async login(email: string, password: string) {
     return runInInjectionContext(this.injector, async () => {
       try {
-        console.log('🔐 Intentando iniciar sesión...');
+        console.log('🔐 Iniciando sesión...');
         const result = await signInWithEmailAndPassword(this.auth, email, password);
-        console.log('✅ Login exitoso:', result.user.email);
+        
+        // NUEVO: Actualizar última conexión
+        await setDoc(
+          doc(this.firestore, 'users', result.user.uid),
+          { lastLogin: new Date() },
+          { merge: true }
+        );
+        
+        // NUEVO: Cargar rol
+        this.currentUserRole = await this.roleService.getUserRole(result.user.uid);
+        
+        console.log('✅ Login exitoso:', result.user.email, '| Rol:', this.currentUserRole);
         return result;
       } catch (error: any) {
         console.error('❌ Error al hacer login:', error);
@@ -68,6 +87,7 @@ export class AuthService {
       try {
         console.log('🚪 Cerrando sesión...');
         await signOut(this.auth);
+        this.currentUserRole = 'user';
         this.router.navigate(['/login']);
         console.log('✅ Sesión cerrada');
       } catch (error) {
@@ -77,25 +97,14 @@ export class AuthService {
     });
   }
 
-  /*async getUserData(uid: string) {
-    // DESHABILITADO: getDoc() no funciona en esta configuración
-    console.warn('getUserData() está deshabilitado. Usando datos de Authentication.');
-    return null;
-  }*/
-
   async getUserData(uid: string) {
     return runInInjectionContext(this.injector, async () => {
       try {
-        console.log('📂 Obteniendo datos del usuario...');
         const userDoc = await getDoc(doc(this.firestore, 'users', uid));
-        
         if (userDoc.exists()) {
-          console.log('✅ Datos obtenidos');
           return userDoc.data();
-        } else {
-          console.warn('⚠️ Usuario no encontrado en Firestore');
-          return null;
         }
+        return null;
       } catch (error) {
         console.error('❌ Error al obtener datos:', error);
         throw error;
@@ -105,5 +114,15 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return this.currentUser !== null;
+  }
+
+  // NUEVO: Verificar si es admin
+  isAdmin(): boolean {
+    return this.currentUserRole === 'admin';
+  }
+
+  // NUEVO: Obtener rol actual
+  getCurrentRole(): UserRole {
+    return this.currentUserRole;
   }
 }

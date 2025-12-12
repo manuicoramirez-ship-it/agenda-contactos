@@ -1,5 +1,4 @@
 <div class="contacts-container">
-  <!-- Navbar -->
   <nav class="navbar">
     <div class="navbar-brand">
       <h2>📱 Agenda de Contactos</h2>
@@ -14,7 +13,6 @@
   </nav>
 
   <div class="content">
-    <!-- Header con botón -->
     <div class="header">
       <h1>Mis Contactos</h1>
       <button class="btn-add" (click)="toggleForm()">
@@ -22,88 +20,49 @@
       </button>
     </div>
 
-    <!-- NUEVO: Sistema de notificaciones -->
-    <div class="notification-container" *ngIf="notification">
-      <div class="notification" 
-           [ngClass]="'notification-' + notification.type"
-           [@slideIn]>
-        <button class="notification-close" (click)="clearNotification()">×</button>
-        <div class="notification-content">{{ notification.message }}</div>
-      </div>
-    </div>
-
     <!-- Formulario -->
-    <div class="form-container" *ngIf="showForm" [@slideDown]>
-      <h3>{{ formTitle }}</h3>
-      
+    <div class="form-container" *ngIf="showForm">
+      <h3>{{ editingId ? 'Editar Contacto' : 'Nuevo Contacto' }}</h3>
       <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
         <div class="form-row">
           <div class="form-group">
-            <label for="firstName">Nombre *</label>
-            <input 
-              type="text" 
-              id="firstName"
-              formControlName="firstName" 
-              placeholder="Ingresa el nombre"
-              [class.error]="contactForm.get('firstName')?.invalid && contactForm.get('firstName')?.touched">
+            <label>Nombre *</label>
+            <input type="text" formControlName="firstName" placeholder="Nombre">
             <div class="error-msg" *ngIf="contactForm.get('firstName')?.invalid && contactForm.get('firstName')?.touched">
-              <span *ngIf="contactForm.get('firstName')?.errors?.['required']">El nombre es obligatorio</span>
-              <span *ngIf="contactForm.get('firstName')?.errors?.['minlength']">Mínimo 2 caracteres</span>
+              Campo obligatorio (mínimo 2 caracteres)
             </div>
           </div>
 
           <div class="form-group">
-            <label for="lastName">Apellido *</label>
-            <input 
-              type="text" 
-              id="lastName"
-              formControlName="lastName" 
-              placeholder="Ingresa el apellido"
-              [class.error]="contactForm.get('lastName')?.invalid && contactForm.get('lastName')?.touched">
+            <label>Apellido *</label>
+            <input type="text" formControlName="lastName" placeholder="Apellido">
             <div class="error-msg" *ngIf="contactForm.get('lastName')?.invalid && contactForm.get('lastName')?.touched">
-              <span *ngIf="contactForm.get('lastName')?.errors?.['required']">El apellido es obligatorio</span>
-              <span *ngIf="contactForm.get('lastName')?.errors?.['minlength']">Mínimo 2 caracteres</span>
+              Campo obligatorio (mínimo 2 caracteres)
             </div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="email">Correo Electrónico *</label>
-            <input 
-              type="email" 
-              id="email"
-              formControlName="email" 
-              placeholder="ejemplo@gmail.com"
-              [class.error]="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
+            <label>Correo Electrónico *</label>
+            <input type="email" formControlName="email" placeholder="ejemplo@gmail.com">
             <div class="error-msg" *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
-              <span *ngIf="contactForm.get('email')?.errors?.['required']">El correo es obligatorio</span>
-              <span *ngIf="contactForm.get('email')?.errors?.['email']">Ingresa un correo válido</span>
+              Ingresa un correo válido
             </div>
           </div>
 
           <div class="form-group">
-            <label for="phone">Teléfono (9 dígitos) *</label>
-            <input 
-              type="text" 
-              id="phone"
-              formControlName="phone" 
-              placeholder="987654321" 
-              maxlength="9"
-              [class.error]="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched">
+            <label>Teléfono (9 dígitos) *</label>
+            <input type="text" formControlName="phone" placeholder="987654321" maxlength="9">
             <div class="error-msg" *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched">
-              <span *ngIf="contactForm.get('phone')?.errors?.['required']">El teléfono es obligatorio</span>
-              <span *ngIf="contactForm.get('phone')?.errors?.['pattern']">Debe tener exactamente 9 dígitos</span>
+              Debe tener exactamente 9 dígitos
             </div>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="contactType">Tipo de Contacto *</label>
-          <select 
-            id="contactType"
-            formControlName="contactType"
-            [class.error]="contactForm.get('contactType')?.invalid && contactForm.get('contactType')?.touched">
+          <label>Tipo de Contacto *</label>
+          <select formControlName="contactType">
             <option value="">Selecciona un tipo</option>
             <option *ngFor="let type of contactTypes" [value]="type">{{ type }}</option>
           </select>
@@ -112,30 +71,25 @@
           </div>
         </div>
 
-        <button 
-          type="submit" 
-          class="btn-submit" 
-          [disabled]="contactForm.invalid || submitting">
-          {{ submitButtonText }}
+        <button type="submit" class="btn-submit" [disabled]="contactForm.invalid">
+          {{ editingId ? '💾 Actualizar' : '➕ Guardar' }}
         </button>
       </form>
     </div>
 
     <!-- Búsqueda -->
-    <div class="search-container" *ngIf="!loading && contacts.length > 0">
+    <div class="search-container" *ngIf="!loading">
       <input 
-        type="text"
+        type="text" 
         placeholder="🔍 Buscar por nombre, correo, teléfono o tipo..."
         (input)="filterContacts($event)"
         class="search-input">
-      <p class="results-count">
-        Mostrando <strong>{{ filteredContacts.length }}</strong> de <strong>{{ contacts.length }}</strong> contactos
-      </p>
+      <p class="results-count">Mostrando {{ filteredContacts.length }} de {{ contacts.length }} contactos</p>
     </div>
 
     <!-- Lista de Contactos -->
     <div class="contacts-grid" *ngIf="!loading && filteredContacts.length > 0">
-      <div class="contact-card" *ngFor="let contact of filteredContacts" [@fadeIn]>
+      <div class="contact-card" *ngFor="let contact of filteredContacts">
         <div class="contact-header">
           <div class="contact-avatar">
             {{ contact.firstName.charAt(0) }}{{ contact.lastName.charAt(0) }}
@@ -147,34 +101,26 @@
             </span>
           </div>
         </div>
-        
         <div class="contact-details">
           <p>📧 {{ contact.email }}</p>
           <p>📱 {{ contact.phone | phoneFormat }}</p>
         </div>
-        
         <div class="contact-actions">
           <button class="btn-edit" (click)="editContact(contact)">✏️ Editar</button>
-          <button class="btn-delete" (click)="deleteContact(contact)">🗑️ Eliminar</button>
+          <button class="btn-delete" (click)="deleteContact(contact.id)">🗑️ Eliminar</button>
         </div>
       </div>
     </div>
 
-    <!-- Estado: Sin resultados de búsqueda -->
     <div class="empty-state" *ngIf="!loading && filteredContacts.length === 0 && contacts.length > 0">
-      <p>🔍 No se encontraron contactos con "<strong>{{ searchTerm }}</strong>"</p>
-      <p>Intenta con otro término de búsqueda</p>
+      <p>❌ No se encontraron contactos con ese criterio</p>
     </div>
 
-    <!-- Estado: Sin contactos -->
     <div class="empty-state" *ngIf="!loading && contacts.length === 0">
-      <p>📭 No tienes contactos aún</p>
-      <p>¡Agrega tu primer contacto usando el botón de arriba!</p>
+      <p>📭 No tienes contactos aún. ¡Agrega tu primer contacto!</p>
     </div>
 
-    <!-- Estado: Cargando -->
     <div class="loading" *ngIf="loading">
-      <div class="spinner"></div>
       <p>Cargando contactos...</p>
     </div>
   </div>

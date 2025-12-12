@@ -7,4 +7,6 @@ export interface Contact {
   contactType: string;
   userId: string;
   createdAt: Date;
+  photoURL?: string; // NUEVO: URL de la foto del contacto
+  updatedAt?: Date; // NUEVO: Última actualización
 }
