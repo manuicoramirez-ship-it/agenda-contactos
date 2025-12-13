@@ -52,3 +52,24 @@ html, body {
     transform: rotate(360deg);
   }
 }
+
+/* Navbar fija en todas las páginas */
+.navbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+}
+
+/* Compensar espacio de navbar fija */
+.content {
+  padding-top: 100px !important;
+}
+
+.home-container,
+.contacts-container,
+.statistics-container,
+.profile-container {
+  padding-top: 70px !important;
+}
