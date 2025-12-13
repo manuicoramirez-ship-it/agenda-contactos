@@ -76,20 +76,20 @@ export class AuthService {
       try {
         console.log('📝 Registrando usuario...');
         const credential = await createUserWithEmailAndPassword(this.auth, email, password);
-
+      
+        // NUEVO: Guardar usuario con rol
         const userDoc = {
           uid: credential.user.uid,
-          email,
-          firstName,
-          lastName,
-          role: 'user' as UserRole,
-          createdAt: new Date(),
-          lastLogin: new Date()
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          role: 'user', // ← AÑADIR: Rol por defecto
+          createdAt: new Date()
         };
-
-        await setDoc(doc(this.firestore, 'users', credential.user.uid), userDoc, { merge: true });
+      
+        await setDoc(doc(this.firestore, 'users', credential.user.uid), userDoc);
         console.log('✅ Usuario registrado con rol: user');
-
+      
         return credential;
       } catch (error: any) {
         console.error('❌ Error al registrar:', error);

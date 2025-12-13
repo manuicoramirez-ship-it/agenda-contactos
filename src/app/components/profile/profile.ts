@@ -25,9 +25,10 @@ export class Profile implements OnInit {
 
 
   totalContacts: number = 0;
+  loading: boolean = true;
+
   roleName: string = 'Usuario';
   roleColor: string = '#4caf50';
-  loading: boolean = true;
 
   private authService = inject(AuthService);
   private contactService = inject(ContactService);
@@ -39,7 +40,7 @@ export class Profile implements OnInit {
     this.loadContactsCount();
   }
 
-  loadUserData() {
+  async loadUserData() {
     const user = this.authService.currentUser;
     if (user) {
       this.userEmail = user.email || '';

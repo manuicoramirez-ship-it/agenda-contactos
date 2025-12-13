@@ -429,11 +429,32 @@
   font-size: 12px;
 }
 
-/* Mostrar foto en card */
+/* Imagen en avatar circular */
+.contact-avatar {
+  position: relative;
+  overflow: hidden;
+}
+
 .contact-avatar-image {
   width: 60px;
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: block;
+}
+
+.contact-avatar span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+}
+
+/* Preview más grande */
+.image-preview {
+  max-width: 300px;
+  max-height: 300px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }

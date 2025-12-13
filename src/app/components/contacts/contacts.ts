@@ -6,16 +6,17 @@ import { AuthService } from '../../services/auth';
 import { ContactService } from '../../services/contact';
 import { NotificationService } from '../../services/notification';
 import { RoleService } from '../../services/role';
-import { StorageService } from '../../services/storage';
 import { Contact } from '../../models/contact';
-import { PhoneFormatPipe } from '../../pipes/phone-format-pipe';
+import { PhoneFormatPipe } from '../../pipes/phone-format-pipe'; // ← AÑADIR
+import { fadeInOut, slideDown, slideInRight } from '../../animations/animations';
 
 @Component({
   selector: 'app-contacts',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, PhoneFormatPipe],
   templateUrl: './contacts.html',
-  styleUrls: ['./contacts.css']
+  styleUrls: ['./contacts.css'],
+  animations: [fadeInOut, slideDown, slideInRight] // ← AÑADIR
 })
 export class Contacts implements OnInit {
   // Estado de la aplicación
@@ -47,15 +48,21 @@ export class Contacts implements OnInit {
   private contactService = inject(ContactService);
   private notificationService = inject(NotificationService);
   private roleService = inject(RoleService);
-  private storageService = inject(StorageService);
 
   constructor() {
     this.contactForm = this.createContactForm();
   }
 
   async ngOnInit() {
+    // 🧪 PRUEBA DE NOTIFICACIONES
+    this.notificationService.success('🎉 ¡Probando notificaciones!');
+  
     await this.loadContacts();
   }
+
+  /*async ngOnInit() {
+    await this.loadContacts();
+  }*/
 
   // Crear formulario
   private createContactForm(): FormGroup {
@@ -122,25 +129,28 @@ export class Contacts implements OnInit {
 
     if (!file) return;
 
-    // Validar tipo y tamaño
+    // Validar tipo
     if (!file.type.startsWith('image/')) {
       this.notificationService.error('❌ Solo se permiten archivos de imagen');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      this.notificationService.error('❌ La imagen no puede superar 5MB');
+    // Validar tamaño (máximo 500KB para Base64)
+    if (file.size > 500 * 1024) {
+      this.notificationService.error('❌ La imagen no puede superar 500KB');
       return;
     }
 
-    this.selectedImageFile = file;
-
-    // Mostrar preview
     try {
-      this.imagePreview = await this.storageService.getImagePreview(file);
-      this.notificationService.success('✅ Imagen cargada. Guarda el contacto para subirla.');
+      // Comprimir y convertir a Base64
+      const base64Image = await this.compressAndConvertToBase64(file);
+    
+      this.selectedImageFile = file;
+      this.imagePreview = base64Image;
+    
+      this.notificationService.success('✅ Imagen cargada correctamente');
     } catch (error) {
-      this.notificationService.error('❌ Error al cargar la imagen');
+      this.notificationService.error('❌ Error al procesar la imagen');
       console.error(error);
     }
   }
@@ -153,6 +163,71 @@ export class Contacts implements OnInit {
     // Limpiar input
     const fileInput = document.getElementById('photo') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
+  }
+
+  // Comprimir imagen y convertir a Base64
+  private compressAndConvertToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = (event: any) => {
+        const img = new Image();
+        img.src = event.target.result;
+
+        img.onload = () => {
+          // Crear canvas para comprimir
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400;  // Reducido para Base64
+          const MAX_HEIGHT = 400;
+
+          let width = img.width;
+          let height = img.height;
+
+          // Calcular nuevas dimensiones
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('No se pudo obtener contexto del canvas'));
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convertir a Base64 con compresión
+          const base64 = canvas.toDataURL('image/jpeg', 0.7); // Calidad 70%
+
+          // Verificar tamaño (Base64 es ~33% más grande que el archivo)
+          const sizeInKB = (base64.length * 3) / 4 / 1024;
+          console.log(`📦 Imagen comprimida: ${sizeInKB.toFixed(2)}KB`);
+
+          if (sizeInKB > 800) {
+            reject(new Error('La imagen es muy grande después de comprimir'));
+            return;
+          }
+
+          resolve(base64);
+        };
+
+        img.onerror = () => reject(new Error('Error al cargar imagen'));
+      };
+
+      reader.onerror = () => reject(new Error('Error al leer archivo'));
+    });
   }
 
 
@@ -253,45 +328,31 @@ export class Contacts implements OnInit {
     this.submitting = true;
 
     try {
-      let photoURL: string | undefined = undefined;
-
-      // Si hay imagen seleccionada, subirla primero
-      if (this.selectedImageFile) {
-        this.uploadingImage = true;
-        try {
-          const tempId = this.editingId || `temp_${Date.now()}`;
-          photoURL = await this.storageService.uploadContactImage(
-            this.selectedImageFile,
-            tempId
-          );
-          this.notificationService.success('📷 Imagen subida exitosamente');
-        } catch (error) {
-          this.notificationService.warning('⚠️ Error al subir imagen, se guardará sin foto');
-          console.error(error);
-        } finally {
-          this.uploadingImage = false;
-        }
-      }
-
-      const contactData = {
+      // Preparar datos del contacto
+      const contactData: any = {
         ...formData,
-        userId: this.authService.currentUser?.uid,
-        ...(photoURL && { photoURL }) // Solo añadir si existe
+        userId: this.authService.currentUser?.uid
       };
+
+      // Si hay imagen, añadirla como Base64
+      if (this.imagePreview) {
+        contactData.photoURL = this.imagePreview; // Base64 directo
+        console.log('📷 Imagen incluida en Base64');
+      }
 
       if (this.editingId) {
         await this.contactService.updateContact(this.editingId, contactData);
-        this.notificationService.success(`✅ ${formData.firstName} ${formData.lastName} actualizado exitosamente`);
+        this.notificationService.success(`✅ ${formData.firstName} ${formData.lastName} actualizado`);
       } else {
         await this.contactService.addContact(contactData);
-        this.notificationService.success(`✅ ${formData.firstName} ${formData.lastName} agregado exitosamente`);
+        this.notificationService.success(`✅ ${formData.firstName} ${formData.lastName} agregado`);
       }
 
       this.toggleForm();
       await this.reloadContacts();
     } catch (error) {
       console.error('Error al guardar:', error);
-      this.notificationService.error('❌ Error al guardar el contacto. Por favor, intenta nuevamente.');
+      this.notificationService.error('❌ Error al guardar el contacto');
     } finally {
       this.submitting = false;
     }

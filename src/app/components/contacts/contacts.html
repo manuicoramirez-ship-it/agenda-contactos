@@ -21,7 +21,7 @@
     </div>
 
     <!-- Formulario -->
-    <div class="form-container" *ngIf="showForm">
+    <div class="form-container" *ngIf="showForm" [@slideDown]>
       <h3>{{ editingId ? 'Editar Contacto' : 'Nuevo Contacto' }}</h3>
       <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
         <div class="form-row">
@@ -93,13 +93,13 @@
           </div>
 
           <small class="help-text">
-            Máximo 5MB. Formatos: JPG, PNG, WEBP
+            Máximo 500KB. Formatos: JPG, PNG, WEBP (se comprimirá automáticamente)
           </small>
         </div>
 
-        --BOton de guardar   
-        <button type="submit" class="btn-submit" [disabled]="contactForm.invalid">
-          {{ editingId ? '💾 Actualizar' : '➕ Guardar' }}
+        <!-- Botón de guardar -->
+        <button type="submit" class="btn-submit" [disabled]="contactForm.invalid || submitting">
+          {{ submitButtonText }}
         </button>
       </form>
     </div>
@@ -116,11 +116,19 @@
 
     <!-- Lista de Contactos -->
     <div class="contacts-grid" *ngIf="!loading && filteredContacts.length > 0">
-      <div class="contact-card" *ngFor="let contact of filteredContacts">
+      <div class="contact-card" *ngFor="let contact of filteredContacts" [@fadeInOut]>
         <div class="contact-header">
           <div class="contact-avatar">
-            {{ contact.firstName.charAt(0) }}{{ contact.lastName.charAt(0) }}
+            <img 
+              *ngIf="contact.photoURL" 
+              [src]="contact.photoURL" 
+              [alt]="contact.firstName" 
+              class="contact-avatar-image">
+            <span *ngIf="!contact.photoURL">
+              {{ contact.firstName.charAt(0) }}{{ contact.lastName.charAt(0) }}
+            </span>
           </div>
+
           <div class="contact-info">
             <h3>{{ contact.firstName }} {{ contact.lastName }}</h3>
             <span class="contact-type" [ngClass]="'type-' + contact.contactType.toLowerCase()">
@@ -128,13 +136,19 @@
             </span>
           </div>
         </div>
+
         <div class="contact-details">
           <p>📧 {{ contact.email }}</p>
           <p>📱 {{ contact.phone | phoneFormat }}</p>
         </div>
+
         <div class="contact-actions">
-          <button *ngIf="canEdit" class="btn-edit" (click)="editContact(contact)"> ✏️ Editar </button>
-          <button *ngIf="canDelete" class="btn-delete" (click)="deleteContact(contact)"> 🗑️ Eliminar </button>
+          <button *ngIf="canEdit" class="btn-edit" (click)="editContact(contact)">
+            ✏️ Editar
+          </button>
+          <button *ngIf="canDelete" class="btn-delete" (click)="deleteContact(contact)">
+            🗑️ Eliminar
+          </button>
         </div>
       </div>
     </div>
