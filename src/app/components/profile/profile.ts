@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { ContactService } from '../../services/contact';
+import { RoleService } from '../../services/role';
 
 @Component({
   selector: 'app-profile',
@@ -24,11 +25,14 @@ export class Profile implements OnInit {
 
 
   totalContacts: number = 0;
+  roleName: string = 'Usuario';
+  roleColor: string = '#4caf50';
   loading: boolean = true;
 
   private authService = inject(AuthService);
   private contactService = inject(ContactService);
   private router = inject(Router);
+  private roleService = inject(RoleService);
 
   ngOnInit() {
     this.loadUserData();
@@ -44,6 +48,11 @@ export class Profile implements OnInit {
       // Obtener nombre y apellido del email
       const emailUsername = this.userEmail.split('@')[0];
       const nameParts = emailUsername.split('.');
+
+      // Cargar rol
+      const role = await this.roleService.getUserRole(user.uid);
+      this.roleName = this.roleService.getRoleName(role);
+      this.roleColor = this.roleService.getRoleColor(role);
 
       // Guardar nombre y apellido por separado
       this.firstName = this.capitalize(nameParts[0] || 'Usuario');

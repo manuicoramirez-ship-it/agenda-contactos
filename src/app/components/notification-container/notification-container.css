@@ -1,0 +1,135 @@
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  position: relative;
+}
+
+.notification:hover {
+  transform: translateX(-5px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.notification-success {
+  border-left-color: #4caf50;
+  background: linear-gradient(to right, #e8f5e9 0%, white 20%);
+}
+
+.notification-error {
+  border-left-color: #f44336;
+  background: linear-gradient(to right, #ffebee 0%, white 20%);
+}
+
+.notification-warning {
+  border-left-color: #ff9800;
+  background: linear-gradient(to right, #fff3e0 0%, white 20%);
+}
+
+.notification-info {
+  border-left-color: #2196f3;
+  background: linear-gradient(to right, #e3f2fd 0%, white 20%);
+}
+
+.notification-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-message {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.notification-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.notification-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.notification-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .notification-container {
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    max-width: none;
+  }
+  
+  .notification {
+    padding: 12px 16px;
+  }
+}
+
+/* Animación de progreso (opcional) */
+.notification::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.3;
+  animation: progress 5s linear;
+}
+
+@keyframes progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}

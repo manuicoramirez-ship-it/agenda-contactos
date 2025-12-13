@@ -370,3 +370,70 @@
     grid-template-columns: 1fr;
   }
 }
+ 
+/* Upload de imagen */
+.file-input {
+  cursor: pointer;
+}
+
+.file-input::-webkit-file-upload-button {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.file-input::-webkit-file-upload-button:hover {
+  transform: translateY(-2px);
+}
+
+.image-preview-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.image-preview {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: block;
+  margin: 0 auto 10px;
+}
+
+.btn-remove-image {
+  background: var(--error-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-remove-image:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+}
+
+.help-text {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-light);
+  font-size: 12px;
+}
+
+/* Mostrar foto en card */
+.contact-avatar-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

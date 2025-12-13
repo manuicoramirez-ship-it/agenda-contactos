@@ -71,6 +71,33 @@
           </div>
         </div>
 
+        <!-- NUEVO: Input para foto del contacto -->
+        <div class="form-group">
+          <label for="photo">📷 Foto del Contacto (opcional)</label>
+          <input 
+            type="file"
+            id="photo"
+            accept="image/*"
+            (change)="onImageSelected($event)"
+            class="file-input">
+
+          <!-- Preview de la imagen -->
+          <div class="image-preview-container" *ngIf="imagePreview">
+            <img [src]="imagePreview" alt="Preview" class="image-preview">
+            <button
+              type="button"
+              class="btn-remove-image"
+              (click)="removeImage()">
+              ❌ Eliminar foto
+            </button>
+          </div>
+
+          <small class="help-text">
+            Máximo 5MB. Formatos: JPG, PNG, WEBP
+          </small>
+        </div>
+
+        --BOton de guardar   
         <button type="submit" class="btn-submit" [disabled]="contactForm.invalid">
           {{ editingId ? '💾 Actualizar' : '➕ Guardar' }}
         </button>
@@ -106,8 +133,8 @@
           <p>📱 {{ contact.phone | phoneFormat }}</p>
         </div>
         <div class="contact-actions">
-          <button class="btn-edit" (click)="editContact(contact)">✏️ Editar</button>
-          <button class="btn-delete" (click)="deleteContact(contact.id)">🗑️ Eliminar</button>
+          <button *ngIf="canEdit" class="btn-edit" (click)="editContact(contact)"> ✏️ Editar </button>
+          <button *ngIf="canDelete" class="btn-delete" (click)="deleteContact(contact)"> 🗑️ Eliminar </button>
         </div>
       </div>
     </div>

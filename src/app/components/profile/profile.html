@@ -35,6 +35,14 @@
             <div class="info-value">{{ firstName }}</div>
           </div>
 
+          <!-- NUEVO: Mostrar rol -->
+          <div class="info-item">
+            <div class="info-label">🎭 Rol</div>
+            <div class="info-value">
+              <span [style.color]="roleColor">{{ roleName }}</span>
+            </div>
+          </div>
+
           <div class="info-item">
             <div class="info-label">👥 Apellido</div>
             <div class="info-value">{{ lastName }}</div>

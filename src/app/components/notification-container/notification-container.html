@@ -1,0 +1,25 @@
+<div class="notification-container">
+  <div 
+    *ngFor="let notification of notifications"
+    class="notification"
+    [ngClass]="'notification-' + notification.type"
+    [@slideInRight]
+    (click)="closeNotification(notification.id)">
+    
+    <div class="notification-icon">
+      {{ getIcon(notification.type) }}
+    </div>
+    
+    <div class="notification-content">
+      <p class="notification-message">{{ notification.message }}</p>
+      <span class="notification-time">{{ notification.timestamp | date:'shortTime' }}</span>
+    </div>
+    
+    <button 
+      *ngIf="notification.closable"
+      class="notification-close"
+      (click)="closeNotification(notification.id); $event.stopPropagation()">
+      ×
+    </button>
+  </div>
+</div>

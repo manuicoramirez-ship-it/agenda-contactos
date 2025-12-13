@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthService } from './auth';
 import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
 
 export type UserRole = 'admin' | 'user' | 'visitor';
@@ -12,16 +11,13 @@ export interface RolePermissions {
   canManageUsers: boolean;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class RoleService {
   private firestore = inject(Firestore);
-  private authService = inject(AuthService);
-  
-  private currentUserRole: UserRole = 'user';
 
-  // Definición de permisos por rol
+  private currentUserRole: UserRole = 'visitor';
+
+  // Permisos por rol
   private readonly ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     admin: {
       canCreate: true,
@@ -46,38 +42,59 @@ export class RoleService {
     }
   };
 
+  /** Rol actual cargado en memoria */
+  getCurrentRole(): UserRole {
+    return this.currentUserRole;
+  }
+
+  /** Setear rol en memoria (por ejemplo al cerrar sesión) */
+  setCurrentRole(role: UserRole): void {
+    this.currentUserRole = role;
+  }
+
+  /** Lee rol desde Firestore y lo guarda en memoria */
   async getUserRole(uid: string): Promise<UserRole> {
     try {
-      const userDoc = await getDoc(doc(this.firestore, 'users', uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        this.currentUserRole = data['role'] || 'user';
-        return this.currentUserRole;
+      const ref = doc(this.firestore, 'users', uid);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        const role = (data?.['role'] ?? 'user') as UserRole;
+
+        this.currentUserRole = role;
+        return role;
       }
-      return 'user';
+
+      // Si no existe documento, por seguridad lo tratamos como visitante
+      this.currentUserRole = 'visitor';
+      return 'visitor';
     } catch (error) {
-      console.error('Error obteniendo rol:', error);
-      return 'user';
+      console.error('❌ Error obteniendo rol:', error);
+      this.currentUserRole = 'visitor';
+      return 'visitor';
     }
   }
 
+  /** Guarda rol en Firestore y lo actualiza en memoria */
   async setUserRole(uid: string, role: UserRole): Promise<void> {
     try {
       await setDoc(doc(this.firestore, 'users', uid), { role }, { merge: true });
+      this.currentUserRole = role;
       console.log(`✅ Rol actualizado a: ${role}`);
     } catch (error) {
-      console.error('Error actualizando rol:', error);
+      console.error('❌ Error actualizando rol:', error);
       throw error;
     }
   }
 
   getPermissions(role?: UserRole): RolePermissions {
-    const userRole = role || this.currentUserRole;
+    const userRole = role ?? this.currentUserRole;
     return this.ROLE_PERMISSIONS[userRole];
   }
 
-  hasPermission(permission: keyof RolePermissions): boolean {
-    return this.getPermissions()[permission];
+  hasPermission(permission: keyof RolePermissions, role?: UserRole): boolean {
+    return this.getPermissions(role)[permission];
   }
 
   isAdmin(): boolean {
