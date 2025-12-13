@@ -24,18 +24,15 @@ export class AuthService {
   currentUserRole: UserRole = 'visitor';
 
   constructor() {
-    // Se dispara en cada cambio de sesión (login/logout)
     this.user$.subscribe(async (u) => {
       this.currentUser = u;
 
       if (!u) {
-        // Logout o no autenticado
         this.currentUserRole = 'visitor';
         this.roleService.setCurrentRole('visitor');
         return;
       }
 
-      // Cuando hay usuario autenticado, cargar/asegurar rol
       const role = await this.ensureAndLoadRole(u.uid, u.email ?? '');
       this.currentUserRole = role;
       this.roleService.setCurrentRole(role);
@@ -44,26 +41,26 @@ export class AuthService {
     });
   }
 
-  // ✅ Crea doc si no existe y carga rol
   private async ensureAndLoadRole(uid: string, email: string): Promise<UserRole> {
     try {
       const ref = doc(this.firestore, 'users', uid);
       const snap = await getDoc(ref);
 
       if (!snap.exists()) {
-        // Si no existe el doc, lo creamos con rol por defecto
         const userDoc = {
           uid,
           email,
           role: 'user' as UserRole,
           createdAt: new Date(),
-          lastLogin: new Date()
+          lastLogin: new Date(),
+          firstName: email.split('@')[0].split('.')[0] || 'Usuario',
+          lastName: email.split('@')[0].split('.')[1] || 'Sin apellido'
         };
         await setDoc(ref, userDoc, { merge: true });
+        console.warn('⚠️ Usuario sin documento previo, creado con datos de email');
         return 'user';
       }
 
-      // Si existe, usamos RoleService para leer rol
       return await this.roleService.getUserRole(uid);
     } catch (e) {
       console.error('❌ Error cargando/asegurando rol:', e);
@@ -75,20 +72,23 @@ export class AuthService {
     return runInInjectionContext(this.injector, async () => {
       try {
         console.log('📝 Registrando usuario...');
+        console.log('Datos recibidos:', { email, firstName, lastName });
+        
         const credential = await createUserWithEmailAndPassword(this.auth, email, password);
       
-        // NUEVO: Guardar usuario con rol
         const userDoc = {
           uid: credential.user.uid,
           email: email,
           firstName: firstName,
           lastName: lastName,
-          role: 'user', // ← AÑADIR: Rol por defecto
-          createdAt: new Date()
+          role: 'user' as UserRole,
+          createdAt: new Date(),
+          lastLogin: new Date()
         };
       
+        console.log('💾 Guardando en Firestore:', userDoc);
         await setDoc(doc(this.firestore, 'users', credential.user.uid), userDoc);
-        console.log('✅ Usuario registrado con rol: user');
+        console.log('✅ Usuario registrado correctamente con nombre:', firstName, lastName);
       
         return credential;
       } catch (error: any) {
@@ -104,15 +104,12 @@ export class AuthService {
         console.log('🔐 Iniciando sesión...');
         const result = await signInWithEmailAndPassword(this.auth, email, password);
 
-        // actualizar lastLogin
         await setDoc(
           doc(this.firestore, 'users', result.user.uid),
           { lastLogin: new Date() },
           { merge: true }
         );
 
-        // No es obligatorio cargar rol aquí porque el subscribe lo hará,
-        // pero lo ponemos para tenerlo inmediato:
         const role = await this.ensureAndLoadRole(result.user.uid, result.user.email ?? '');
         this.currentUserRole = role;
         this.roleService.setCurrentRole(role);
@@ -132,7 +129,6 @@ export class AuthService {
         console.log('🚪 Cerrando sesión...');
         await signOut(this.auth);
 
-        // rol seguro por defecto
         this.currentUserRole = 'visitor';
         this.roleService.setCurrentRole('visitor');
 
@@ -148,8 +144,17 @@ export class AuthService {
   async getUserData(uid: string) {
     return runInInjectionContext(this.injector, async () => {
       try {
+        console.log('📂 Obteniendo datos del usuario:', uid);
         const userDoc = await getDoc(doc(this.firestore, 'users', uid));
-        return userDoc.exists() ? userDoc.data() : null;
+        
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          console.log('✅ Datos obtenidos:', data);
+          return data;
+        } else {
+          console.warn('⚠️ Usuario no encontrado en Firestore');
+          return null;
+        }
       } catch (error) {
         console.error('❌ Error al obtener datos:', error);
         throw error;

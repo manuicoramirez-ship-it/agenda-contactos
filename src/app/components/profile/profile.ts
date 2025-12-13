@@ -23,7 +23,6 @@ export class Profile implements OnInit {
   createdAtDate: string = '';
   createdAtTime: string = '';
 
-
   totalContacts: number = 0;
   loading: boolean = true;
 
@@ -35,54 +34,71 @@ export class Profile implements OnInit {
   private router = inject(Router);
   private roleService = inject(RoleService);
 
-  ngOnInit() {
-    this.loadUserData();
-    this.loadContactsCount();
+  async ngOnInit() {
+    await this.loadUserData();
+    await this.loadContactsCount();
   }
 
   async loadUserData() {
-    const user = this.authService.currentUser;
-    if (user) {
-      this.userEmail = user.email || '';
-      this.userId = user.uid || '';
+    try {
+      const user = this.authService.currentUser;
+      if (user) {
+        this.userEmail = user.email || '';
+        this.userId = user.uid || '';
 
-      // Obtener nombre y apellido del email
-      const emailUsername = this.userEmail.split('@')[0];
-      const nameParts = emailUsername.split('.');
+        // ✅ OBTENER DATOS DESDE FIRESTORE
+        const userData = await this.authService.getUserData(user.uid);
 
-      // Cargar rol
-      const role = await this.roleService.getUserRole(user.uid);
-      this.roleName = this.roleService.getRoleName(role);
-      this.roleColor = this.roleService.getRoleColor(role);
+        // Cargar rol
+        const role = await this.roleService.getUserRole(user.uid);
+        this.roleName = this.roleService.getRoleName(role);
+        this.roleColor = this.roleService.getRoleColor(role);
 
-      // Guardar nombre y apellido por separado
-      this.firstName = this.capitalize(nameParts[0] || 'Usuario');
-      this.lastName = this.capitalize(nameParts[1] || 'Sin Apellido');
-      
-      this.userName = `${this.firstName} ${this.lastName}`;
-      this.userInitials = this.firstName.charAt(0) + this.lastName.charAt(0);
+        if (userData && userData['firstName'] && userData['lastName']) {
+          // ✅ USAR DATOS DE FIRESTORE
+          this.firstName = userData['firstName'];
+          this.lastName = userData['lastName'];
+          
+          console.log('✅ Datos cargados desde Firestore:', this.firstName, this.lastName);
+        } else {
+          // Fallback: usar email si no hay datos
+          console.warn('⚠️ No se encontraron datos, usando email');
+          const emailUsername = this.userEmail.split('@')[0];
+          const nameParts = emailUsername.split('.');
+          
+          this.firstName = this.capitalize(nameParts[0] || 'Usuario');
+          this.lastName = this.capitalize(nameParts[1] || 'Sin Apellido');
+        }
 
-      // Fecha y hora en formato dd/mm/yy y hh:mm:ss
-      if (user.metadata && user.metadata.creationTime) {
-        const creationDate = new Date(user.metadata.creationTime);
-        
-        // Formato: dd/mm/yy
-        const day = String(creationDate.getDate()).padStart(2, '0');
-        const month = String(creationDate.getMonth() + 1).padStart(2, '0');
-        const year = String(creationDate.getFullYear()).slice(-2); // Solo últimos 2 dígitos
-        this.createdAtDate = `${day}/${month}/${year}`;
-        
-        // Formato: hh:mm:ss
-        const hours = String(creationDate.getHours()).padStart(2, '0');
-        const minutes = String(creationDate.getMinutes()).padStart(2, '0');
-        const seconds = String(creationDate.getSeconds()).padStart(2, '0');
-        this.createdAtTime = `${hours}:${minutes}:${seconds}`;
-      } else {
-        this.createdAtDate = 'No disponible';
-        this.createdAtTime = 'No disponible';
+        // Construir nombre completo e iniciales
+        this.userName = `${this.firstName} ${this.lastName}`;
+        this.userInitials = this.firstName.charAt(0) + this.lastName.charAt(0);
+
+        // Fecha y hora en formato dd/mm/yy y hh:mm:ss
+        if (user.metadata && user.metadata.creationTime) {
+          const creationDate = new Date(user.metadata.creationTime);
+          
+          // Formato: dd/mm/yy
+          const day = String(creationDate.getDate()).padStart(2, '0');
+          const month = String(creationDate.getMonth() + 1).padStart(2, '0');
+          const year = String(creationDate.getFullYear()).slice(-2);
+          this.createdAtDate = `${day}/${month}/${year}`;
+          
+          // Formato: hh:mm:ss
+          const hours = String(creationDate.getHours()).padStart(2, '0');
+          const minutes = String(creationDate.getMinutes()).padStart(2, '0');
+          const seconds = String(creationDate.getSeconds()).padStart(2, '0');
+          this.createdAtTime = `${hours}:${minutes}:${seconds}`;
+        } else {
+          this.createdAtDate = 'No disponible';
+          this.createdAtTime = 'No disponible';
+        }
       }
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+    } finally {
+      this.loading = false;
     }
-    this.loading = false;
   }
 
   capitalize(str: string): string {
