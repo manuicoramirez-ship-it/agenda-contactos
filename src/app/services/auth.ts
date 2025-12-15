@@ -1,11 +1,5 @@
 import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
-import {
-  Auth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  user
-} from '@angular/fire/auth';
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword,signOut, user } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, getDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { RoleService, UserRole } from './role';
@@ -68,14 +62,17 @@ export class AuthService {
     }
   }
 
+  // REGISTRO
   async register(email: string, password: string, firstName: string, lastName: string) {
     return runInInjectionContext(this.injector, async () => {
       try {
         console.log('📝 Registrando usuario...');
         console.log('Datos recibidos:', { email, firstName, lastName });
         
+        // 1. Crear usuario en Firebase Auth
         const credential = await createUserWithEmailAndPassword(this.auth, email, password);
       
+        // 2. Guardar datos adicionales en Firestore
         const userDoc = {
           uid: credential.user.uid,
           email: email,

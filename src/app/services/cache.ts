@@ -44,7 +44,7 @@ export class CacheService {
       return null;
     }
 
-    // Verificar si el userId coincide
+    // Verificar si el usuario coincide
     if (this.contactsCache.userId !== userId) {
       console.log('⚠️ Caché de otro usuario, invalidando...');
       this.contactsCache = null;

@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing';
+import { CacheService } from './cache';
 
-import { Cache } from './cache';
-
-describe('Cache', () => {
-  let service: Cache;
+describe('CacheService', () => {
+  let service: CacheService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Cache);
+    service = TestBed.inject(CacheService);
   });
 
   it('should be created', () => {

@@ -26,9 +26,7 @@ export class NotificationService {
     console.log('🔔 Servicio de notificaciones inicializado');
   }
 
-  /**
-   * Mostrar notificación de éxito
-   */
+  /* Mostrar notificación de éxito */
   success(message: string, duration?: number): void {
     this.show({
       type: 'success',
@@ -36,11 +34,10 @@ export class NotificationService {
       duration: duration || this.defaultDuration,
       closable: true
     });
+    this.playSound('success');
   }
 
-  /**
-   * Mostrar notificación de error
-   */
+  /* Mostrar notificación de error */
   error(message: string, duration?: number): void {
     this.show({
       type: 'error',
@@ -51,9 +48,7 @@ export class NotificationService {
     this.playSound('error');
   }
 
-  /**
-   * Mostrar notificación de advertencia
-   */
+  /* Mostrar notificación de advertencia */
   warning(message: string, duration?: number): void {
     this.show({
       type: 'warning',
@@ -61,11 +56,10 @@ export class NotificationService {
       duration: duration || this.defaultDuration,
       closable: true
     });
+    this.playSound('warning');
   }
 
-  /**
-   * Mostrar notificación informativa
-   */
+  /* Mostrar notificación informativa */
   info(message: string, duration?: number): void {
     this.show({
       type: 'info',
@@ -73,11 +67,10 @@ export class NotificationService {
       duration: duration || this.defaultDuration,
       closable: true
     });
+    this.playSound('info');
   }
 
-  /**
-   * Mostrar notificación personalizada
-   */
+  /* Mostrar notificación personalizada */
   show(options: Partial<Notification>): void {
     const notification: Notification = {
       id: this.generateId(),
@@ -108,39 +101,29 @@ export class NotificationService {
     console.log(`🔔 [${notification.type.toUpperCase()}] ${notification.message}`);
   }
 
-  /**
-   * Eliminar notificación por ID
-   */
+  /* Eliminar notificación por ID */
   remove(id: string): void {
     const currentNotifications = this.notificationsSubject.value;
     const filtered = currentNotifications.filter(n => n.id !== id);
     this.notificationsSubject.next(filtered);
   }
 
-  /**
-   * Limpiar todas las notificaciones
-   */
+  /* Limpiar todas las notificaciones */
   clear(): void {
     this.notificationsSubject.next([]);
   }
 
-  /**
-   * Obtener todas las notificaciones actuales
-   */
+  /* Obtener todas las notificaciones actuales */
   getAll(): Notification[] {
     return this.notificationsSubject.value;
   }
 
-  /**
-   * Generar ID único
-   */
+  /* Generar ID único */
   private generateId(): string {
     return `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  /**
-   * Reproducir sonido de notificación (opcional)
-   */
+  /* Reproducir sonido de notificación*/
   private playSound(type: 'success' | 'error' | 'warning' | 'info'): void {
     // Frecuencias para diferentes tipos de sonidos
     const frequencies: Record<string, number[]> = {
@@ -191,16 +174,12 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Configurar duración por defecto
-   */
+  /* Configurar duración por defecto */
   setDefaultDuration(duration: number): void {
     this.defaultDuration = duration;
   }
 
-  /**
-   * Configurar máximo de notificaciones
-   */
+  /* Configurar máximo de notificaciones */
   setMaxNotifications(max: number): void {
     this.maxNotifications = max;
   }

@@ -3,14 +3,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #04040c 0%, #5c262e 100%);
   padding: 20px;
 }
 
 .register-card {
-  background: white;
+  background: rgba(204, 204, 207, 0.87);
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.966);
   padding: 40px;
   width: 100%;
   max-width: 500px;
@@ -28,13 +28,13 @@
 }
 
 .register-header h1 {
-  color: #f5576c;
+  color: #448630;
   font-size: 28px;
   margin-bottom: 10px;
 }
 
 .register-header p {
-  color: #666;
+  color: #3a3cbb;
   font-size: 14px;
 }
 
@@ -68,7 +68,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #f5576c;
+  border-color: #61121c;
   box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1);
 }
 
@@ -127,7 +127,7 @@
 }
 
 .login-link a {
-  color: #f5576c;
+  color: #ce3146;
   text-decoration: none;
   font-weight: 600;
 }
@@ -165,6 +165,6 @@
 }
 
 .toggle-password:hover {
-  color: #f5576c;
+  color: #af4452;
   transform: scale(1.1);
 }

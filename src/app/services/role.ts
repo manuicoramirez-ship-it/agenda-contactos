@@ -42,17 +42,17 @@ export class RoleService {
     }
   };
 
-  /** Rol actual cargado en memoria */
+  /* Rol actual cargado en memoria */
   getCurrentRole(): UserRole {
     return this.currentUserRole;
   }
 
-  /** Setear rol en memoria (por ejemplo al cerrar sesión) */
+  /* Setear rol en memoria (por ejemplo al cerrar sesión) */
   setCurrentRole(role: UserRole): void {
     this.currentUserRole = role;
   }
 
-  /** Lee rol desde Firestore y lo guarda en memoria */
+  /* Lee rol desde Firestore y lo guarda en memoria */
   async getUserRole(uid: string): Promise<UserRole> {
     try {
       const ref = doc(this.firestore, 'users', uid);
@@ -76,7 +76,7 @@ export class RoleService {
     }
   }
 
-  /** Guarda rol en Firestore y lo actualiza en memoria */
+  /* Guarda rol en Firestore y lo actualiza en memoria */
   async setUserRole(uid: string, role: UserRole): Promise<void> {
     try {
       await setDoc(doc(this.firestore, 'users', uid), { role }, { merge: true });
@@ -93,6 +93,7 @@ export class RoleService {
     return this.ROLE_PERMISSIONS[userRole];
   }
 
+  // Verificar permisos
   hasPermission(permission: keyof RolePermissions, role?: UserRole): boolean {
     return this.getPermissions(role)[permission];
   }

@@ -60,10 +60,6 @@ export class Contacts implements OnInit {
     await this.loadContacts();
   }
 
-  /*async ngOnInit() {
-    await this.loadContacts();
-  }*/
-
   // Crear formulario
   private createContactForm(): FormGroup {
     return this.fb.group({
@@ -393,7 +389,7 @@ export class Contacts implements OnInit {
     this.applySearchFilter();
   }
 
-  // Aplicar filtro de búsqueda
+  // Búsqueda
   private applySearchFilter(): void {
     if (!this.searchTerm) {
       this.filteredContacts = [...this.contacts];

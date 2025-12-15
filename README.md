@@ -12,16 +12,14 @@ Aplicación web para gestión de contactos personales con autenticación, sistem
 **Fecha de Entrega:** Diciembre 2024  
 **Framework:** Angular 19 (Standalone Components)  
 **Backend:** Firebase (Authentication + Firestore)
-
+**URL Deploy** https://contacto-agenda-393aa.web.app
 ---
 
 ## 🚀 Tecnologías Utilizadas
 
 ### Frontend
-- **Angular 19** - Framework principal con Standalone Components
+- **Angular 20** - Framework principal con Standalone Components
 - **TypeScript 5.7** - Lenguaje de programación
-- **RxJS** - Programación reactiva
-- **CSS3** - Estilos y animaciones
 
 ### Backend y Servicios
 - **Firebase Authentication** - Gestión de usuarios

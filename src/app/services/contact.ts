@@ -16,9 +16,8 @@ export class ContactService {
   // Variable para evitar múltiples llamadas simultáneas
   private loadingContacts: Promise<Contact[]> | null = null;
 
-  // ========================================
+
   // AGREGAR CONTACTO
-  // ========================================
   async addContact(contact: Omit<Contact, 'id'>) {
     return runInInjectionContext(this.injector, async () => {
       try {
@@ -31,7 +30,7 @@ export class ContactService {
         const docRef = await addDoc(collection(this.firestore, 'contacts'), contactData);
         console.log('✅ Contacto agregado:', docRef.id);
         
-        // ← NUEVO: Invalidar caché al agregar
+        // Invalidar caché al agregar
         this.cacheService.invalidateCache();
         
         return docRef;
@@ -42,9 +41,8 @@ export class ContactService {
     });
   }
 
-  // ========================================
-  // OBTENER CONTACTOS (CON CACHÉ)
-  // ========================================
+  
+  // OBTENER CONTACTOS
   async getContacts(): Promise<Contact[]> {
     return runInInjectionContext(this.injector, async () => {
       try {
@@ -55,14 +53,14 @@ export class ContactService {
           return [];
         }
 
-        // ← NUEVO: 1. INTENTAR OBTENER DESDE CACHÉ
+        // INTENTAR OBTENER DESDE CACHÉ
         const cachedContacts = this.cacheService.getContacts(userId);
         if (cachedContacts) {
           console.log('⚡ Contactos cargados desde caché (instantáneo)');
           return cachedContacts;
         }
 
-        // ← NUEVO: 2. Evitar múltiples llamadas simultáneas
+        // Evitar múltiples llamadas simultáneas
         if (this.loadingContacts) {
           console.log('⏳ Esperando carga en progreso...');
           return this.loadingContacts;
@@ -70,12 +68,12 @@ export class ContactService {
 
         console.log('📋 Obteniendo contactos del usuario:', userId);
 
-        // 3. SI NO HAY CACHÉ, CARGAR DESDE FIRESTORE
+        // SI NO HAY CACHÉ, CARGAR DESDE FIRESTORE
         this.loadingContacts = this.fetchContactsFromFirestore(userId);
         const contacts = await this.loadingContacts;
         this.loadingContacts = null;
 
-        // ← NUEVO: 4. GUARDAR EN CACHÉ PARA PRÓXIMAS VECES
+        // GUARDAR EN CACHÉ PARA PRÓXIMAS VECES
         this.cacheService.setContacts(contacts, userId);
 
         return contacts;
@@ -93,10 +91,9 @@ export class ContactService {
     });
   }
 
-  // ========================================
+
   // MÉTODO PRIVADO: FETCH DESDE FIRESTORE
-  // ========================================
-  private async fetchContactsFromFirestore(userId: string): Promise<Contact[]> {
+    private async fetchContactsFromFirestore(userId: string): Promise<Contact[]> {
     const q = query(
       collection(this.firestore, 'contacts'),
       where('userId', '==', userId),
@@ -119,9 +116,7 @@ export class ContactService {
     return contacts;
   }
 
-  // ========================================
   // ACTUALIZAR CONTACTO
-  // ========================================
   async updateContact(id: string, contact: Partial<Contact>) {
     return runInInjectionContext(this.injector, async () => {
       try {
@@ -139,9 +134,7 @@ export class ContactService {
     });
   }
 
-  // ========================================
   // ELIMINAR CONTACTO
-  // ========================================
   async deleteContact(id: string) {
     return runInInjectionContext(this.injector, async () => {
       try {
@@ -149,7 +142,7 @@ export class ContactService {
         await deleteDoc(doc(this.firestore, 'contacts', id));
         console.log('✅ Contacto eliminado');
         
-        // ← NUEVO: Invalidar caché al eliminar
+        // Invalidar caché al eliminar
         this.cacheService.invalidateCache();
       } catch (error) {
         console.error('❌ Error al eliminar contacto:', error);
